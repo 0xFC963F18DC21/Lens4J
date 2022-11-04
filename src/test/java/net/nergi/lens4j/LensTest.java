@@ -94,17 +94,105 @@ class LensTest {
     // Compositional tests.
     @Test
     void lensShouldAllowNestedViewing() {
-        fail("Not implemented yet!");
+        // Constants to test for.
+        final int v1 = 5;
+        final int v2 = 10;
+
+        // Our box.
+        final TestRecBox init = new TestRecBox(v1, v2);
+
+        // Our composite lenses.
+        final Lens<TestBox, Integer> lens1 =
+            new Lens<>(TestBox::getContent1, (i, tb) -> new TestBox(i, tb.getContent2()));
+
+        final Lens<TestBox, Integer> lens2 =
+            new Lens<>(TestBox::getContent2, (i, tb) -> new TestBox(tb.getContent1(), i));
+
+        final Lens<TestRecBox, TestBox> lensRec =
+            new Lens<>(TestRecBox::getInnerBox, (tb, trb) -> new TestRecBox(tb));
+
+        final Lens<TestRecBox, Integer> lensRec1 = lensRec.andThen(lens1);
+        final Lens<TestRecBox, Integer> lensRec2 = lensRec.andThen(lens2);
+
+        // Testing if the lenses can view the correct values.
+        assertEquals(v1, lensRec1.view(init));
+        assertEquals(v2, lensRec2.view(init));
     }
 
     @Test
     void lensShouldAllowNestedModification() {
-        fail("Not implemented yet!");
+        // Constants to test for.
+        final int v1 = 5;
+        final int v2 = 10;
+
+        // Our test modifier function.
+        final UnaryOperator<Integer> operator = i -> i + 5;
+
+        // Our box.
+        final TestRecBox init = new TestRecBox(v1, v2);
+
+        // Our composite lenses.
+        final Lens<TestBox, Integer> lens1 =
+            new Lens<>(TestBox::getContent1, (i, tb) -> new TestBox(i, tb.getContent2()));
+
+        final Lens<TestBox, Integer> lens2 =
+            new Lens<>(TestBox::getContent2, (i, tb) -> new TestBox(tb.getContent1(), i));
+
+        final Lens<TestRecBox, TestBox> lensRec =
+            new Lens<>(TestRecBox::getInnerBox, (tb, trb) -> new TestRecBox(tb));
+
+        final Lens<TestRecBox, Integer> lensRec1 = lensRec.andThen(lens1);
+        final Lens<TestRecBox, Integer> lensRec2 = lensRec.andThen(lens2);
+
+        // Some changed boxes.
+        final TestRecBox leftMod = lensRec1.over(operator, init);
+        final TestRecBox rightMod = lensRec2.over(operator, init);
+
+        // Testing if the lenses can modify the values correctly.
+        assertEquals(operator.apply(v1), leftMod.getInnerBox().getContent1());
+        assertEquals(operator.apply(v2), rightMod.getInnerBox().getContent2());
+
+        // Testing if the box remains unchanged.
+        assertEquals(v1, init.getInnerBox().getContent1());
+        assertEquals(v2, init.getInnerBox().getContent2());
+
     }
 
     @Test
     void lensShouldAllowNestedSetting() {
-        fail("Not implemented yet!");
+        // Constants to test for.
+        final int v1 = 5;
+        final int v2 = 10;
+        final int n1 = 15;
+        final int n2 = 20;
+
+        // Our box.
+        final TestRecBox init = new TestRecBox(v1, v2);
+
+        // Our composite lenses.
+        final Lens<TestBox, Integer> lens1 =
+            new Lens<>(TestBox::getContent1, (i, tb) -> new TestBox(i, tb.getContent2()));
+
+        final Lens<TestBox, Integer> lens2 =
+            new Lens<>(TestBox::getContent2, (i, tb) -> new TestBox(tb.getContent1(), i));
+
+        final Lens<TestRecBox, TestBox> lensRec =
+            new Lens<>(TestRecBox::getInnerBox, (tb, trb) -> new TestRecBox(tb));
+
+        final Lens<TestRecBox, Integer> lensRec1 = lensRec.andThen(lens1);
+        final Lens<TestRecBox, Integer> lensRec2 = lensRec.andThen(lens2);
+
+        // The new boxes.
+        final TestRecBox leftSet = lensRec1.set(n1, init);
+        final TestRecBox rightSet = lensRec2.set(n2, init);
+
+        // Testing if the lenses can """set""" the correct values.
+        assertEquals(n1, leftSet.getInnerBox().getContent1());
+        assertEquals(n2, rightSet.getInnerBox().getContent2());
+
+        // Testing if the box remains unchanged.
+        assertEquals(v1, init.getInnerBox().getContent1());
+        assertEquals(v2, init.getInnerBox().getContent2());
     }
 
     // Our simple container types.
@@ -137,7 +225,7 @@ class LensTest {
             this(new TestBox(c1, c2));
         }
 
-        private TestRecBox(TestBox innerBox) {
+        public TestRecBox(TestBox innerBox) {
             this.innerBox = innerBox;
         }
 
