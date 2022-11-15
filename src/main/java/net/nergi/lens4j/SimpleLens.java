@@ -22,6 +22,6 @@ public final class SimpleLens<T, F> extends Lens<T, T, F, F> {
 
     /** Like {@link Lens#andThen}, but only for simple lenses. */
     public <G> SimpleLens<T, G> andThenSimple(SimpleLens<F, G> next) {
-        return new SimpleLens<>(o -> next.view(view(o)), (o, t) -> set(next.set(o, view(t)), t));
+        return new SimpleLens<>(t -> next.view(view(t)), (g, t) -> set(next.set(g, view(t)), t));
     }
 }

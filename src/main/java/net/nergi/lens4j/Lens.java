@@ -3,7 +3,6 @@ package net.nergi.lens4j;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-
 /**
  * The Lens.
  * <p>
@@ -87,6 +86,6 @@ public sealed class Lens<S, T, A, B> permits SimpleLens {
      * @param <D> Next projected field type.
      */
     public <C, D> Lens<S, T, C, D> andThen(Lens<A, B, C, D> next) {
-        return new Lens<>(o -> next.view(view(o)), (o, t) -> set(next.set(o, view(t)), t));
+        return new Lens<>(s -> next.view(view(s)), (d, s) -> set(next.set(d, view(s)), s));
     }
 }
