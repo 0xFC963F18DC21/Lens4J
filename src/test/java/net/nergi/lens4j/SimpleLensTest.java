@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.function.UnaryOperator;
 import org.junit.jupiter.api.Test;
 
-class LensTest {
+class SimpleLensTest {
     // Surface-level tests.
     @Test
     void lensShouldAllowSurfaceViewing() {
@@ -17,11 +17,11 @@ class LensTest {
         final TestBox init = new TestBox(v1, v2);
 
         // The two lenses, one for each field.
-        final Lens<TestBox, Integer> lens1 =
-            new Lens<>(TestBox::getContent1, (i, tb) -> new TestBox(i, tb.getContent2()));
+        final SimpleLens<TestBox, Integer> lens1 =
+            new SimpleLens<>(TestBox::getContent1, (i, tb) -> new TestBox(i, tb.getContent2()));
 
-        final Lens<TestBox, Integer> lens2 =
-            new Lens<>(TestBox::getContent2, (i, tb) -> new TestBox(tb.getContent1(), i));
+        final SimpleLens<TestBox, Integer> lens2 =
+            new SimpleLens<>(TestBox::getContent2, (i, tb) -> new TestBox(tb.getContent1(), i));
 
         // Testing if the lenses can view the correct values.
         assertEquals(v1, lens1.view(init));
@@ -41,11 +41,11 @@ class LensTest {
         final TestBox init = new TestBox(v1, v2);
 
         // The two lenses, one for each field.
-        final Lens<TestBox, Integer> lens1 =
-            new Lens<>(TestBox::getContent1, (i, tb) -> new TestBox(i, tb.getContent2()));
+        final SimpleLens<TestBox, Integer> lens1 =
+            new SimpleLens<>(TestBox::getContent1, (i, tb) -> new TestBox(i, tb.getContent2()));
 
-        final Lens<TestBox, Integer> lens2 =
-            new Lens<>(TestBox::getContent2, (i, tb) -> new TestBox(tb.getContent1(), i));
+        final SimpleLens<TestBox, Integer> lens2 =
+            new SimpleLens<>(TestBox::getContent2, (i, tb) -> new TestBox(tb.getContent1(), i));
 
         // Some changed boxes.
         final TestBox leftMod = lens1.over(operator, init);
@@ -72,11 +72,11 @@ class LensTest {
         final TestBox init = new TestBox(v1, v2);
 
         // The two lenses, one for each field.
-        final Lens<TestBox, Integer> lens1 =
-            new Lens<>(TestBox::getContent1, (i, tb) -> new TestBox(i, tb.getContent2()));
+        final SimpleLens<TestBox, Integer> lens1 =
+            new SimpleLens<>(TestBox::getContent1, (i, tb) -> new TestBox(i, tb.getContent2()));
 
-        final Lens<TestBox, Integer> lens2 =
-            new Lens<>(TestBox::getContent2, (i, tb) -> new TestBox(tb.getContent1(), i));
+        final SimpleLens<TestBox, Integer> lens2 =
+            new SimpleLens<>(TestBox::getContent2, (i, tb) -> new TestBox(tb.getContent1(), i));
 
         // The new boxes.
         final TestBox leftSet = lens1.set(n1, init);
@@ -102,17 +102,17 @@ class LensTest {
         final TestRecBox init = new TestRecBox(v1, v2);
 
         // Our composite lenses.
-        final Lens<TestBox, Integer> lens1 =
-            new Lens<>(TestBox::getContent1, (i, tb) -> new TestBox(i, tb.getContent2()));
+        final SimpleLens<TestBox, Integer> lens1 =
+            new SimpleLens<>(TestBox::getContent1, (i, tb) -> new TestBox(i, tb.getContent2()));
 
-        final Lens<TestBox, Integer> lens2 =
-            new Lens<>(TestBox::getContent2, (i, tb) -> new TestBox(tb.getContent1(), i));
+        final SimpleLens<TestBox, Integer> lens2 =
+            new SimpleLens<>(TestBox::getContent2, (i, tb) -> new TestBox(tb.getContent1(), i));
 
-        final Lens<TestRecBox, TestBox> lensRec =
-            new Lens<>(TestRecBox::getInnerBox, (tb, trb) -> new TestRecBox(tb));
+        final SimpleLens<TestRecBox, TestBox> lensRec =
+            new SimpleLens<>(TestRecBox::getInnerBox, (tb, trb) -> new TestRecBox(tb));
 
-        final Lens<TestRecBox, Integer> lensRec1 = lensRec.andThen(lens1);
-        final Lens<TestRecBox, Integer> lensRec2 = lensRec.andThen(lens2);
+        final SimpleLens<TestRecBox, Integer> lensRec1 = lensRec.andThenSimple(lens1);
+        final SimpleLens<TestRecBox, Integer> lensRec2 = lensRec.andThenSimple(lens2);
 
         // Testing if the lenses can view the correct values.
         assertEquals(v1, lensRec1.view(init));
@@ -132,17 +132,17 @@ class LensTest {
         final TestRecBox init = new TestRecBox(v1, v2);
 
         // Our composite lenses.
-        final Lens<TestBox, Integer> lens1 =
-            new Lens<>(TestBox::getContent1, (i, tb) -> new TestBox(i, tb.getContent2()));
+        final SimpleLens<TestBox, Integer> lens1 =
+            new SimpleLens<>(TestBox::getContent1, (i, tb) -> new TestBox(i, tb.getContent2()));
 
-        final Lens<TestBox, Integer> lens2 =
-            new Lens<>(TestBox::getContent2, (i, tb) -> new TestBox(tb.getContent1(), i));
+        final SimpleLens<TestBox, Integer> lens2 =
+            new SimpleLens<>(TestBox::getContent2, (i, tb) -> new TestBox(tb.getContent1(), i));
 
-        final Lens<TestRecBox, TestBox> lensRec =
-            new Lens<>(TestRecBox::getInnerBox, (tb, trb) -> new TestRecBox(tb));
+        final SimpleLens<TestRecBox, TestBox> lensRec =
+            new SimpleLens<>(TestRecBox::getInnerBox, (tb, trb) -> new TestRecBox(tb));
 
-        final Lens<TestRecBox, Integer> lensRec1 = lensRec.andThen(lens1);
-        final Lens<TestRecBox, Integer> lensRec2 = lensRec.andThen(lens2);
+        final SimpleLens<TestRecBox, Integer> lensRec1 = lensRec.andThenSimple(lens1);
+        final SimpleLens<TestRecBox, Integer> lensRec2 = lensRec.andThenSimple(lens2);
 
         // Some changed boxes.
         final TestRecBox leftMod = lensRec1.over(operator, init);
@@ -170,17 +170,17 @@ class LensTest {
         final TestRecBox init = new TestRecBox(v1, v2);
 
         // Our composite lenses.
-        final Lens<TestBox, Integer> lens1 =
-            new Lens<>(TestBox::getContent1, (i, tb) -> new TestBox(i, tb.getContent2()));
+        final SimpleLens<TestBox, Integer> lens1 =
+            new SimpleLens<>(TestBox::getContent1, (i, tb) -> new TestBox(i, tb.getContent2()));
 
-        final Lens<TestBox, Integer> lens2 =
-            new Lens<>(TestBox::getContent2, (i, tb) -> new TestBox(tb.getContent1(), i));
+        final SimpleLens<TestBox, Integer> lens2 =
+            new SimpleLens<>(TestBox::getContent2, (i, tb) -> new TestBox(tb.getContent1(), i));
 
-        final Lens<TestRecBox, TestBox> lensRec =
-            new Lens<>(TestRecBox::getInnerBox, (tb, trb) -> new TestRecBox(tb));
+        final SimpleLens<TestRecBox, TestBox> lensRec =
+            new SimpleLens<>(TestRecBox::getInnerBox, (tb, trb) -> new TestRecBox(tb));
 
-        final Lens<TestRecBox, Integer> lensRec1 = lensRec.andThen(lens1);
-        final Lens<TestRecBox, Integer> lensRec2 = lensRec.andThen(lens2);
+        final SimpleLens<TestRecBox, Integer> lensRec1 = lensRec.andThenSimple(lens1);
+        final SimpleLens<TestRecBox, Integer> lensRec2 = lensRec.andThenSimple(lens2);
 
         // The new boxes.
         final TestRecBox leftSet = lensRec1.set(n1, init);

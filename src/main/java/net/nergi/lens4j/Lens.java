@@ -2,7 +2,7 @@ package net.nergi.lens4j;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
+
 
 /**
  * The Lens.
@@ -13,15 +13,17 @@ import java.util.function.UnaryOperator;
  * It also provides a way to regenerate fresh instances of the object with new field contents, allowing for fast
  * "immutable modification" of an immutable object.
  *
- * @param <T> The class being viewed.
- * @param <F> The type of the field being viewed.
+ * @param <S> The class being viewed.
+ * @param <T> The projected class actually being viewed.
+ * @param <A> The field being viewed.
+ * @param <B> The projected type of the field actually being viewed.
  */
-public final class Lens<T, F> {
+public sealed class Lens<S, T, A, B> permits SimpleLens {
     /** The accessor function to a field of a class. */
-    private final Function<T, F> accessor;
+    private final Function<S, A> accessor;
 
     /** The function that generates new instances of a class given "new" contents of a field. */
-    private final BiFunction<F, T, T> replacer;
+    private final BiFunction<B, S, T> replacer;
 
     /**
      * Create a lens from an accessor and builder (dubbed "replacer") for new instances of the class with the field set
@@ -36,7 +38,7 @@ public final class Lens<T, F> {
      * @param accessor Function that provides a view into a field.
      * @param replacer Function that generates a new instance of the class with the field set to the new value.
      */
-    public Lens(Function<T, F> accessor, BiFunction<F, T, T> replacer) {
+    public Lens(Function<S, A> accessor, BiFunction<B, S, T> replacer) {
         this.accessor = accessor;
         this.replacer = replacer;
     }
@@ -47,7 +49,7 @@ public final class Lens<T, F> {
      * @param instance Instance to peek the field contents of.
      * @return Field contents of instance.
      */
-    public F view(T instance) {
+    public A view(S instance) {
         return accessor.apply(instance);
     }
 
@@ -58,7 +60,7 @@ public final class Lens<T, F> {
      * @param instance Instance to map over.
      * @return New instance of class with mapped field contents.
      */
-    public T over(UnaryOperator<F> mapper, T instance) {
+    public T over(Function<A, B> mapper, S instance) {
         return replacer.apply(mapper.apply(view(instance)), instance);
     }
 
@@ -69,7 +71,7 @@ public final class Lens<T, F> {
      * @param instance Instance to replace the field contents of.
      * @return New instance of class with replaced field contents.
      */
-    public T set(F value, T instance) {
+    public T set(B value, S instance) {
         return replacer.apply(value, instance);
     }
 
@@ -81,9 +83,10 @@ public final class Lens<T, F> {
      *
      * @param next The next lens to run.
      * @return The combined lens formed by composing the two lenses together, this lens before the next.
-     * @param <O> The type of the field being manipulated inside the original field.
+     * @param <C> Next real field type.
+     * @param <D> Next projected field type.
      */
-    public <O> Lens<T, O> andThen(Lens<F, O> next) {
-        return new Lens<>(t -> next.view(view(t)), (o, t) -> set(next.set(o, view(t)), t));
+    public <C, D> Lens<S, T, C, D> andThen(Lens<A, B, C, D> next) {
+        return new Lens<>(o -> next.view(view(o)), (o, t) -> set(next.set(o, view(t)), t));
     }
 }
