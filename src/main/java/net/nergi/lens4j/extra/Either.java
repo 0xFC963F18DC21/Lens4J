@@ -1,6 +1,7 @@
 package net.nergi.lens4j.extra;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * The Either sum type, for Java 17+.
@@ -78,6 +79,15 @@ public sealed interface Either<L, R> permits Left, Right {
      */
     default Either<L, R> or(Either<L, R> other) {
         return (this instanceof Left<L, R>) ? other : this;
+    }
+
+    /**
+     * Alternate version of {@link #or} that is lazy on the argument.
+     * <p>
+     * Giving a zero-ary lambda as the argument is the recommended use of this function.
+     */
+    default Either<L, R> lazyOr(Supplier<Either<L, R>> other) {
+        return (this instanceof Left<L, R>) ? other.get() : this;
     }
 
     /**
